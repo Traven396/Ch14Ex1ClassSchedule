@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ClassSchedule.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace ClassSchedule
 {
@@ -25,6 +26,11 @@ namespace ClassSchedule
 
             services.AddDbContext<ClassScheduleContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("ClassScheduleContext")));
+
+            services.AddTransient<IClassScheduleUnitOfWork, ClassScheduleUnitOfWork>();
+            services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
         // Use this method to configure the HTTP request pipeline.

@@ -6,16 +6,18 @@ namespace ClassSchedule.Controllers
 {
     public class ClassController : Controller
     {
-        private ClassScheduleUnitOfWork data { get; set; }
-        public ClassController(ClassScheduleContext ctx)
+        private IClassScheduleUnitOfWork data { get; set; }
+        private IHttpContextAccessor htpCtx { get; set; }
+        public ClassController(IClassScheduleUnitOfWork ctx, IHttpContextAccessor ctxAcc)
         {
-            data = new ClassScheduleUnitOfWork(ctx);
+            data = ctx;
+            htpCtx = ctxAcc;
         }
 
         public RedirectToActionResult Index() 
         {
             // clear session and navigate to list of classes
-            HttpContext.Session.Remove("dayid");
+            htpCtx.HttpContext.Session.Remove("dayid");
             return RedirectToAction("Index", "Home"); 
         }
 
@@ -60,7 +62,7 @@ namespace ClassSchedule.Controllers
         public ViewResult Delete(int id)
         {
             var c = this.GetClass(id);
-            ViewBag.DayId = HttpContext.Session.GetInt32("dayid");
+            ViewBag.DayId = htpCtx.HttpContext.Session.GetInt32("dayid");
             return View(c);
         }
 
@@ -97,14 +99,14 @@ namespace ClassSchedule.Controllers
             });
 
             ViewBag.Operation = operation;
-            ViewBag.DayId = HttpContext.Session.GetInt32("dayid");
+            ViewBag.DayId = htpCtx.HttpContext.Session.GetInt32("dayid");
         }
 
         private RedirectToActionResult GoToClasses()
         {
             // if session has a value for day id, add to id route segment when redirecting
-            if (HttpContext.Session.GetInt32("dayid").HasValue)
-                return RedirectToAction("Index", "Home", new { id = HttpContext.Session.GetInt32("dayid") });
+            if (htpCtx.HttpContext.Session.GetInt32("dayid").HasValue)
+                return RedirectToAction("Index", "Home", new { id = htpCtx.HttpContext.Session.GetInt32("dayid") });
             else
                 return RedirectToAction("Index", "Home");
         }
